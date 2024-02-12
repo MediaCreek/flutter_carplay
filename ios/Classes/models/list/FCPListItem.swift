@@ -6,6 +6,7 @@
 //
 
 import CarPlay
+import SDWebImage
 
 @available(iOS 14.0, *)
 class FCPListItem {
@@ -18,6 +19,7 @@ class FCPListItem {
   private var image: String?
   private var playbackProgress: CGFloat?
   private var isPlaying: Bool?
+  private var isPlayable: Bool?
   private var playingIndicatorLocation: CPListItemPlayingIndicatorLocation?
   private var accessoryType: CPListItemAccessoryType?
   
@@ -29,6 +31,7 @@ class FCPListItem {
     self.image = obj["image"] as? String
     self.playbackProgress = obj["playbackProgress"] as? CGFloat
     self.isPlaying = obj["isPlaying"] as? Bool
+    self.isPlayable = obj["isPlayable"] as? Bool
     self.setPlayingIndicatorLocation(fromString: obj["playingIndicatorLocation"] as? String)
     self.setAccessoryType(fromString: obj["accessoryType"] as? String)
   }
@@ -47,7 +50,14 @@ class FCPListItem {
       }
     }
     if image != nil {
-      listItem.setImage(UIImage().fromFlutterAsset(name: image!))
+        if(image!.starts(with: "http")){
+            let url = URL(string: image!)
+            SDWebImageManager.shared.loadImage(with: url, options: [], progress: nil, completed: { (imageUI, data, error, _, _, _) in
+                listItem.setImage(imageUI)
+            })
+        } else {
+            listItem.setImage(UIImage().fromFlutterAsset(name: image!))
+        }
     }
     if playbackProgress != nil {
       listItem.playbackProgress = playbackProgress!
@@ -67,10 +77,18 @@ class FCPListItem {
   
   public func stopHandler() {
     guard self.completeHandler != nil else {
+        if(self.isPlayable ?? false){
+            let nowplayingTemplate = CPNowPlayingTemplate.shared
+            FlutterCarPlaySceneDelegate.push(template: nowplayingTemplate, animated: true)
+        }
       return
     }
     self.completeHandler!()
     self.completeHandler = nil
+      if(self.isPlayable ?? false){
+          let nowplayingTemplate = CPNowPlayingTemplate.shared
+          FlutterCarPlaySceneDelegate.push(template: nowplayingTemplate, animated: true)
+      }
   }
   
   public func update(text: String?, detailText: String?, image: String?, playbackProgress: CGFloat?, isPlaying: Bool?, playingIndicatorLocation: String?, accessoryType: String?) {
@@ -83,8 +101,16 @@ class FCPListItem {
       self.detailText = detailText
     }
     if image != nil {
-      self._super?.setImage(UIImage().fromFlutterAsset(name: image!))
-      self.image = image
+        if(image!.starts(with: "http")){
+            let url = URL(string: image!)
+            SDWebImageManager.shared.loadImage(with: url, options: [], progress: nil, completed: { (imageUI, data, error, _, _, _) in
+                self._super?.setImage(imageUI)
+                self.image = image
+            })
+        } else {
+          self._super?.setImage(UIImage().fromFlutterAsset(name: image!))
+          self.image = image
+        }
     }
     if playbackProgress != nil {
       self._super?.playbackProgress = playbackProgress!

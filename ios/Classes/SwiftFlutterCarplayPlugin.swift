@@ -14,6 +14,7 @@ public class SwiftFlutterCarplayPlugin: NSObject, FlutterPlugin {
   private(set) static var registrar: FlutterPluginRegistrar?
   private static var objcRootTemplate: FCPRootTemplate?
   private static var _rootTemplate: CPTemplate?
+  private static var lastListTemplate: [FCPListTemplate] = []
   public static var animated: Bool = false
   private var objcPresentTemplate: FCPPresentTemplate?
   
@@ -105,8 +106,10 @@ public class SwiftFlutterCarplayPlugin: NSObject, FlutterPlugin {
     case FCPChannelTypes.onListItemSelectedComplete:
       guard let args = call.arguments as? String else {
         result(false)
+          print("AAAAAAAAAAAAAAAAAAAAAVVVVV NO ")
         return
       }
+        print("AAAAAAAAAAAAAAAAAAAAAVVVVV onListItemSelectedComplete " + args)
       SwiftFlutterCarplayPlugin.findItem(elementId: args, actionWhenFound: { item in
         item.stopHandler()
       })
@@ -157,6 +160,9 @@ public class SwiftFlutterCarplayPlugin: NSObject, FlutterPlugin {
       }
       for _ in 1...(args["count"] as! Int) {
         FlutterCarPlaySceneDelegate.pop(animated: args["animated"] as! Bool)
+          if(!SwiftFlutterCarplayPlugin.lastListTemplate.isEmpty){
+              SwiftFlutterCarplayPlugin.lastListTemplate.removeLast()
+          }
       }
       result(true)
       break
@@ -174,6 +180,7 @@ public class SwiftFlutterCarplayPlugin: NSObject, FlutterPlugin {
         result(false)
         return
       }
+        print("AAAAAAAAAAAAAAAAAAAAAVVVVV pushTemplate ")
       var pushTemplate: CPTemplate?
       let animated = args["animated"] as! Bool
       switch args["runtimeType"] as! String {
@@ -189,6 +196,8 @@ public class SwiftFlutterCarplayPlugin: NSObject, FlutterPlugin {
     
       case String(describing: FCPListTemplate.self):
         pushTemplate = FCPListTemplate(obj: args["template"] as! [String : Any], templateType: FCPListTemplateTypes.DEFAULT).get
+          SwiftFlutterCarplayPlugin.lastListTemplate.append(FCPListTemplate(obj: args["template"] as! [String : Any], templateType: FCPListTemplateTypes.DEFAULT))
+          
         break
       default:
         result(false)
@@ -205,6 +214,9 @@ public class SwiftFlutterCarplayPlugin: NSObject, FlutterPlugin {
       FlutterCarPlaySceneDelegate.popToRootTemplate(animated: animated)
       self.objcPresentTemplate = nil
       result(true)
+      break
+    case FCPChannelTypes.isConnected:
+        result(FlutterCarPlaySceneDelegate.getConnectionType() == FCPConnectionTypes.connected)
       break
     default:
       result(false)
@@ -238,10 +250,21 @@ public class SwiftFlutterCarplayPlugin: NSObject, FlutterPlugin {
         for i in s.getItems() {
           if (i.elementId == elementId) {
             actionWhenFound(i)
-            break l1
+            return
           }
         }
       }
     }
+      if !SwiftFlutterCarplayPlugin.lastListTemplate.isEmpty {
+        
+      l2: for s in SwiftFlutterCarplayPlugin.lastListTemplate.last!.getSections() {
+      for i in s.getItems() {
+              if (i.elementId == elementId) {
+              actionWhenFound(i)
+                  return
+                  }
+                }
+              }
+            }
   }
 }

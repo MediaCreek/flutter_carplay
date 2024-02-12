@@ -70,11 +70,12 @@ class FlutterCarPlayController {
               break;
             case CPListTemplate:
               for (var s in (h as CPListTemplate).sections) {
-                for (var i in s.items) {
+                for (CPListItem i in s.items) {
                   if (i.uniqueId == updatedListItem.uniqueId) {
                     currentRootTemplate!
                         .sections[currentRootTemplate!.sections.indexOf(s)]
                         .items[s.items.indexOf(i)] = updatedListItem;
+                    //maybe here bug?
                     break l1;
                   }
                 }
@@ -147,7 +148,7 @@ class FlutterCarPlayController {
     CPBarButton? barButton;
     l1:
     for (var t in templateHistory) {
-      if (t.runtimeType.toString() == "CPListTemplate") {
+      if (t.runtimeType.toString() == "CPListTemplate" && t.backButton != null && t.backButton!.uniqueId == elementId) {
         barButton = t.backButton;
         break l1;
       }

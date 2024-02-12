@@ -37,7 +37,7 @@ class FlutterCarplay {
   /// A listener function, which will be triggered when CarPlay connection changes
   /// and will be transmitted to the main code, allowing the user to access
   /// the current connection status.
-  Function(CPConnectionStatusTypes status)? _onCarplayConnectionChange;
+  static Function(CPConnectionStatusTypes status)? _onCarplayConnectionChange;
 
   /// Creates an [FlutterCarplay] and starts the connection.
   FlutterCarplay() {
@@ -246,6 +246,16 @@ class FlutterCarplay {
     return await _carPlayController.reactToNativeModule(
       FCPChannelTypes.popToRootTemplate,
       animated,
+    );
+  }
+
+  static Future<bool> isConnected() async {
+    FlutterCarPlayController.templateHistory = [
+      FlutterCarPlayController.currentRootTemplate
+    ];
+    return await _carPlayController.reactToNativeModule(
+      FCPChannelTypes.isConnected,
+      false,
     );
   }
 

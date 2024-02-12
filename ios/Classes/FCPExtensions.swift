@@ -4,7 +4,6 @@
 //
 //  Created by Oğuzhan Atalay on 21.08.2021.
 //
-
 extension UIImage {
   convenience init?(withURL url: URL) throws {
     let imageData = try Data(contentsOf: url)
@@ -13,6 +12,9 @@ extension UIImage {
   
   @available(iOS 14.0, *)
   func fromFlutterAsset(name: String) -> UIImage {
+    if(name == "") {
+        return UIImage(systemName: "questionmark")!
+    }
     let key: String? = SwiftFlutterCarplayPlugin.registrar?.lookupKey(forAsset: name)
     let image: UIImage? = UIImage(imageLiteralResourceName: key!)
     return image ?? UIImage(systemName: "questionmark")!

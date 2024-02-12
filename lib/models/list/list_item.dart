@@ -28,6 +28,9 @@ class CPListItem {
   /// Determines whether the list item displays its Now Playing indicator.
   bool? isPlaying;
 
+  /// Determines whether the list item is a MediaItem.
+  bool? isPlayable;
+
   /// The location where the list item displays its Now Playing indicator.
   CPListItemPlayingIndicatorLocations? playingIndicatorLocation;
 
@@ -46,6 +49,7 @@ class CPListItem {
     this.image,
     this.playbackProgress,
     this.isPlaying,
+    this.isPlayable,
     this.playingIndicatorLocation,
     this.accessoryType,
   });
@@ -58,6 +62,7 @@ class CPListItem {
         "image": image,
         "playbackProgress": playbackProgress,
         "isPlaying": isPlaying,
+        "isPlayable": isPlayable,
         "playingIndicatorLocation":
             CPEnumUtils.stringFromEnum(playingIndicatorLocation.toString()),
         "accessoryType": CPEnumUtils.stringFromEnum(accessoryType.toString()),

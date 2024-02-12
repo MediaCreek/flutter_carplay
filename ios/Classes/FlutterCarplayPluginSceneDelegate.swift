@@ -10,6 +10,7 @@ import CarPlay
 @available(iOS 14.0, *)
 class FlutterCarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegate {
   static private var interfaceController: CPInterfaceController?
+  static private var connectionType = FCPConnectionTypes.disconnected
   
   static public func forceUpdateRootTemplate() {
     let rootTemplate = SwiftFlutterCarplayPlugin.rootTemplate
@@ -17,14 +18,24 @@ class FlutterCarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelega
     
     self.interfaceController?.setRootTemplate(rootTemplate!, animated: animated)
   }
+    
+//  static public func getConnectionType() -> String {
+//    return connectionType
+//  }
+    
+  static public func getConnectionType() -> String {
+    return connectionType
+  }
   
   // Fired when just before the carplay become active
   func sceneDidBecomeActive(_ scene: UIScene) {
+    FlutterCarPlaySceneDelegate.connectionType = FCPConnectionTypes.connected
     SwiftFlutterCarplayPlugin.onCarplayConnectionChange(status: FCPConnectionTypes.connected)
   }
   
   // Fired when carplay entered background
   func sceneDidEnterBackground(_ scene: UIScene) {
+    FlutterCarPlaySceneDelegate.connectionType = FCPConnectionTypes.background
     SwiftFlutterCarplayPlugin.onCarplayConnectionChange(status: FCPConnectionTypes.background)
   }
   
@@ -57,21 +68,21 @@ class FlutterCarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelega
   
   func templateApplicationScene(_ templateApplicationScene: CPTemplateApplicationScene,
                                 didConnect interfaceController: CPInterfaceController) {
-    FlutterCarPlaySceneDelegate.interfaceController = interfaceController
-    
-    SwiftFlutterCarplayPlugin.onCarplayConnectionChange(status: FCPConnectionTypes.connected)
-    let rootTemplate = SwiftFlutterCarplayPlugin.rootTemplate
-
-    guard rootTemplate != nil else {
-      FlutterCarPlaySceneDelegate.interfaceController = nil
-      return
-    }
-    
-    FlutterCarPlaySceneDelegate.interfaceController?.setRootTemplate(rootTemplate!, animated: SwiftFlutterCarplayPlugin.animated)
+      FlutterCarPlaySceneDelegate.interfaceController = interfaceController
+      
+      FlutterCarPlaySceneDelegate.connectionType = FCPConnectionTypes.connected
+      SwiftFlutterCarplayPlugin.onCarplayConnectionChange(status: FCPConnectionTypes.connected)
+      let rootTemplate = SwiftFlutterCarplayPlugin.rootTemplate
+      
+      if rootTemplate != nil {
+        FlutterCarPlaySceneDelegate.interfaceController?.setRootTemplate(rootTemplate!, animated: SwiftFlutterCarplayPlugin.animated, completion: nil)
+      }
   }
   
   func templateApplicationScene(_ templateApplicationScene: CPTemplateApplicationScene,
                                 didDisconnect interfaceController: CPInterfaceController, from window: CPWindow) {
+      
+    FlutterCarPlaySceneDelegate.connectionType = FCPConnectionTypes.disconnected
     SwiftFlutterCarplayPlugin.onCarplayConnectionChange(status: FCPConnectionTypes.disconnected)
     
     //FlutterCarPlaySceneDelegate.interfaceController = nil
@@ -79,6 +90,8 @@ class FlutterCarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelega
   
   func templateApplicationScene(_ templateApplicationScene: CPTemplateApplicationScene,
                                 didDisconnectInterfaceController interfaceController: CPInterfaceController) {
+      
+    FlutterCarPlaySceneDelegate.connectionType = FCPConnectionTypes.disconnected
     SwiftFlutterCarplayPlugin.onCarplayConnectionChange(status: FCPConnectionTypes.disconnected)
     
     //FlutterCarPlaySceneDelegate.interfaceController = nil
